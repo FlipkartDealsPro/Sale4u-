@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sale4u — Shoes</title>
+<style>
+/* Same UI styling (kept minimal to paste quickly) */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+*{box-sizing:border-box}
+body{font-family:'Poppins',sans-serif;margin:0;background:#f3f6f9;color:#07213a}
+
+/* Header/Logo (Simplified) */
+.header{
+    background:linear-gradient(90deg,#cff0f3,#eaf8ee);
+    padding:12px 14px;
+    text-align:left;
+    position:sticky;
+    top:0;
+    z-index:40;
+    border-bottom:1px solid rgba(7,33,58,0.06)
+}
+.logo{font-weight:700;font-size:20px;color:#052a45}
+
+/* Top Search Bar - Now only Search Input and Home button */
+.top-search{display:flex;gap:8px;padding:10px;align-items:center}
+.search-box{flex:1;background:#fff;border-radius:999px;padding:8px 12px;display:flex;align-items:center;box-shadow:0 4px 14px rgba(2,6,23,0.06)}
+.search-box input{flex:1;border:0;outline:none;font-size:14px}
+.small-ico{
+    width:36px;
+    height:36px;
+    border-radius:8px;
+    background:#fff;
+    border:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 4px 12px rgba(2,6,23,0.04);
+    font-size:18px;
+    cursor: pointer;
+}
+/* Removed .deliver CSS */
+
+/* Product Grid */
+.page-head{padding:12px;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding:12px}
+.product-card{background:#fff;border-radius:12px;padding:10px;box-shadow:0 8px 24px rgba(2,6,23,0.06);border:1px solid rgba(2,6,23,0.03)}
+.product-card img{width:100%;height:150px;object-fit:cover;border-radius:8px}
+.p-title{font-size:14px;margin-top:8px;color:#07213a}
+
+/* Full Price Structure Styling (Added/Updated) */
+.p-prices{margin-top:6px}
+.p-price-label{font-size:12px;color:#666;margin-top:4px}
+.p-price-val{font-weight:700}
+.p-sale4u{color:#b12704;}    /* Sale4u Price */
+.p-amazon{color:#0078d7;}    /* Amazon Price */
+.p-flipkart{color:#008060;} /* Flipkart Price */
+
+/* Buttons */
+.row{display:flex;gap:8px}
+.btn{padding:9px 12px;border-radius:10px;border:0;font-weight:700;cursor:pointer; width: 100%;}
+.btn.primary{background:#0078d7;color:#fff}
+.btn.ghost{background:transparent;border:1px solid rgba(2,6,23,0.06);color:#07213a}
+.btn.amazon{background:#ff9900;color:#000; flex:1;}
+.btn.flipkart{background:#2874f0;color:#fff; flex:1;}
+
+/* Modal Styling */
+.modal{position:fixed;inset:0;display:none;align-items:flex-end;justify-content:center;padding:12px;background:rgba(2,6,23,0.28);z-index:80}
+.modal-card{width:100%;max-width:520px;background:#fff;border-radius:12px;padding:14px}
+.modal-card input, .modal-card textarea {
+    width:100%;
+    padding:10px;
+    margin-top:8px;
+    border-radius:8px;
+    border:1px solid rgba(2,6,23,0.06);
+}
+</style>
+</head>
+<body data-page="shoes">
+
+  <div class="header">
+    <div class="logo">Sale4u</div>
+  </div>
+
+  <div class="top-search">
+    <div class="search-box">
+      <input id="search2" placeholder="Search shoes">
+    </div>
+    <button class="small-ico" onclick="navigate('index.html')" title="Go to Home">🏠</button>
+  </div>
+  
+  <main>
+    <h2 style="padding:12px;text-align:center">Shoes Collection</h2>
+    <div class="grid" id="gridShoes"></div>
+  </main>
+
+  <div class="modal" id="buyerModal" aria-hidden="true">
+    <div class="modal-card">
+      <h4>Buy on Sale4u</h4>
+      <div id="buyTitle" style="font-weight:700;margin-bottom:8px"></div>
+      <input id="buyerName" placeholder="Your name">
+      <input id="buyerMobile" placeholder="Mobile (with country code)">
+      <input id="buyerAddress" placeholder="Address">
+      <input id="buyerPincode" placeholder="Pincode">
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn primary" onclick="confirmBuy()">Contact on WhatsApp</button>
+        <button class="btn" onclick="closeModal('buyerModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="sellerModal" aria-hidden="true">
+    <div class="modal-card admin">
+      <h4>Seller Login</h4>
+      <input id="adminPass" type="password" placeholder="Password">
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn primary" onclick="checkAdmin()">Login</button>
+        <button class="btn" onclick="closeModal('sellerModal')">Close</button>
+      </div>
+      <div id="adminArea" style="display:none;margin-top:12px">
+        <h5 style="color:#fff">Add Product</h5>
+        <input id="pTitle" placeholder="Title">
+        <input id="pPrice" type="number" placeholder="Price">
+        <input id="pCategory" placeholder="Category (shoes)">
+        <input id="pImage" placeholder="Image URL">
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn primary" onclick="addProductAdmin()">Add</button>
+          <button class="btn" onclick="showAdminList()">Manage</button>
+        </div>
+        <div id="adminList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+const WA = "916376196229";
+let products = JSON.parse(localStorage.getItem('sale4u_products')||'[]');
+
+function render(){
+  const grid = document.getElementById('gridShoes'); grid.innerHTML='';
+  const list = products.filter(p=> (p.category||'').toLowerCase()==='shoes');
+  if(list.length===0){ grid.innerHTML='<div style="padding:12px;color:#666">No shoes available</div>'; return; }
+  list.forEach(p=>{
+    const d=document.createElement('div'); d.className='product-card';
+    
+    // --- UPDATED RENDER CONTENT to include full details ---
+    d.innerHTML = `
+      <img src="${p.image}" alt="">
+      <div class="p-title">${escapeHtml(p.title)}</div>
+      
+      <div class="p-prices">
+        <div class="p-price-label">Sale4u Price: <span class="p-price-val p-sale4u">₹${p.price}</span></div>
+        <div class="p-price-label">Amazon Price: <span class="p-price-val p-amazon">₹${p.amazonPrice || 'N/A'}</span></div>
+        <div class="p-price-label">Flipkart Price: <span class="p-price-val p-flipkart">₹${p.flipkartPrice || 'N/A'}</span></div>
+      </div>
+      
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn primary" style="flex:1" onclick="openBuy('${encodeURIComponent(p.title)}')">Buy on Sale4u</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn amazon" onclick="window.open('${p.amazon||'#'}','_blank')">Buy on Amazon</button>
+        <button class="btn flipkart" onclick="window.open('${p.flipkart||'#'}','_blank')">Buy on Flipkart</button>
+      </div>
+      `;
+    // --- END UPDATED RENDER CONTENT ---
+    
+    grid.appendChild(d);
+  });
+}
+
+function openBuy(titleEnc){ 
+    document.getElementById('buyTitle').innerText=decodeURIComponent(titleEnc); 
+    openModal('buyerModal'); 
+}
+
+function confirmBuy(){ 
+    const name=document.getElementById('buyerName').value.trim(); 
+    const mobile=document.getElementById('buyerMobile').value.trim(); 
+    const address=document.getElementById('buyerAddress').value.trim(); 
+    const pin=document.getElementById('buyerPincode').value.trim(); 
+    const title=document.getElementById('buyTitle').innerText; 
+    
+    if(!name||!mobile||!address||!pin){alert('Please fill all fields');return;} 
+    
+    // WhatsApp message formatting using URL-encoded newlines (%0A)
+    const newLine = '%0A';
+    const msg = 
+        `*ORDER REQUEST - Sale4u (Shoes Page)*${newLine}${newLine}` +
+        `I want to buy: *${title}*${newLine}` +
+        `Name: ${name}${newLine}` +
+        `Mobile: ${mobile}${newLine}` +
+        `Address: ${address}${newLine}` +
+        `Pincode: ${pin}${newLine}` +
+        `Payment Method: Cash on Delivery (COD)${newLine}${newLine}` +
+        `_Please confirm the order and delivery details._`;
+
+    window.open(`https://wa.me/${WA}?text=${msg}`,'_blank'); 
+    closeModal('buyerModal'); 
+}
+
+function openModal(id){const m=document.getElementById(id); if(m) {m.style.display='flex'; m.setAttribute('aria-hidden','false');}}
+function closeModal(id){const m=document.getElementById(id); if(m) {m.style.display='none'; m.setAttribute('aria-hidden','true');}}
+
+// Admin functions (kept for compatibility)
+function checkAdmin(){ const p=document.getElementById('adminPass').value; if(p==='1234'){ document.getElementById('adminArea').style.display='block'; showAdminList(); document.getElementById('adminPass').value=''; } else alert('Wrong'); }
+function addProductAdmin(){ if(products.length>=100){alert('limit');return;} const t=document.getElementById('pTitle').value.trim(); const price=parseInt(document.getElementById('pPrice').value); const cat=(document.getElementById('pCategory').value||'').trim().toLowerCase(); const img=document.getElementById('pImage').value.trim(); if(!t||!price||!cat||!img){alert('fill');return;} products.push({title:t,price,category:cat,image:img}); localStorage.setItem('sale4u_products',JSON.stringify(products)); render(); alert('added'); }
+function showAdminList(){ const box=document.getElementById('adminList'); box.innerHTML=''; products.forEach((p,i)=>{ const r=document.createElement('div'); r.style.display='flex'; r.style.justifyContent='space-between'; r.style.padding='6px 0'; r.innerHTML=`<div style="font-size:13px;color:#111">${escapeHtml(p.title)}</div><div><button style="background:#ef4444;color:#fff;border:none;padding:6px 8px;border-radius:8px" onclick="deleteProduct(${i})">Delete</button></div>`; box.appendChild(r); }); }
+function deleteProduct(i){ if(!confirm('delete?'))return; products.splice(i,1); localStorage.setItem('sale4u_products',JSON.stringify(products)); render(); showAdminList(); }
+
+function navigate(u){ window.location.href=u; }
+function scrollToTop(){ window.scrollTo({top:0,behavior:'smooth'}); }
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+render();
+</script>
+</body>
+</html>
