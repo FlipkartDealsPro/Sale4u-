@@ -1,4 +1,3 @@
-
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -65,12 +64,10 @@ body{font-family:'Poppins',sans-serif;margin:0;background:#f3f6f9;color:#07213a}
 .btn.amazon{background:#ff9900;color:#000} /* Amazon color */
 .btn.flipkart{background:#2874f0;color:#fff} /* Flipkart color */
 
-/* --- Bottom Nav CSS Update --- */
+/* --- Bottom Nav CSS Updated for 'Moveable' (Removed 'position:fixed') --- */
 .bottom-nav{
-    position:fixed;
-    left:0;
-    right:0;
-    bottom:0;
+    /* Removed: position:fixed; left:0; right:0; bottom:0; */
+    margin-top: 24px; /* Added spacing to separate it from the content above */
     background:#000000; /* Black strip */
     padding:10px 16px; 
     border-top:1px solid #333; 
@@ -78,7 +75,7 @@ body{font-family:'Poppins',sans-serif;margin:0;background:#f3f6f9;color:#07213a}
     justify-content: flex-start; /* Aligns Seller to the left */
     align-items:center;
     z-index:50;
-    height: 60px; 
+    height: 60px;
 }
 
 /* Seller Button Style/Position */
@@ -187,6 +184,10 @@ body{font-family:'Poppins',sans-serif;margin:0;background:#f3f6f9;color:#07213a}
       <div class="grid" id="gridAll"></div>
     </section>
   </main>
+  
+  <div class="bottom-nav">
+    <div class="bn-seller" onclick="openModal('sellerModal')">Seller</div>
+  </div>
 
   <div class="modal" id="buyerModal" aria-hidden="true">
     <div class="modal-card">
@@ -255,10 +256,6 @@ body{font-family:'Poppins',sans-serif;margin:0;background:#f3f6f9;color:#07213a}
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="bottom-nav">
-    <div class="bn-seller" onclick="openModal('sellerModal')">Seller</div>
   </div>
 
 <script>
@@ -434,6 +431,5 @@ function deleteProduct(i){ if(!confirm('Delete product?')) return; products.spli
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 </script>
 </body>
-</html>
-
-        
+          </html>
+    
